@@ -1,0 +1,97 @@
+# /etc/sudoers.d/[USERNAME] must be set to NOPASSWD:ALL
+
+- hosts: localhost
+  become: true
+  tasks:
+    # - include: repos.yml sudoers.yml base.yml desktop.yml
+    - name: "Enable i386 Packages"
+      command: dpkg --add-architecture i386
+      register: multiarch_status
+    # - file:
+    #     path: /home/weaverg/test.txt
+    #     state: file
+    - name: "Install apt-transport-https package(s) and dependencies for Apt"
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg2
+        - software-properties-common
+
+    - name: "Google Chrome Apt Repository"
+      apt_repository:
+        repo: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+        state: present
+        filename: google-chrome
+
+    - name: "Jenkins Apt Repository"
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+        filename: jenkins
+
+    - name: "Debian Apt Repository - Contrib"
+      apt_repository:
+        repo: deb http://debian.osuosl.org/debian/ stretch contrib
+        state: present
+        filename: debian-contrib
+
+    - name: "Debian Apt Repository - Non-Free"
+      apt_repository:
+        repo: deb http://debian.osuosl.org/debian/ stretch non-free
+        state: present
+        filename: debian-non-free
+
+    - name: "Sublime Text Apt Repository"
+      apt_repository:
+        repo: deb https://download.sublimetext.com/ apt/stable/
+        state: present
+        filename: sublime-text
+
+    - name: "Docker Apt Repository"
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
+        state: present
+        filename: docker
+
+    - name: "Update Apt cache"
+      apt:
+        update_cache: true
+
+    - name: "Add sudoers.d/ file"
+      template: 
+        src: templates/sudoers.j2
+        dest: /etc/sudoers.d/weaverg
+
+    - name: "Install Sublime Text"
+      apt: 
+        name: sublime-text
+        state: latest
+
+    - name: "Install Google Chrome"
+      apt: 
+        name: google-chrome-stable
+        state: latest
+
+    - name: "Install Docker"
+      apt: 
+        name: docker-ce
+        state: latest
+
+    - name: "Linux Headers - AMD64"
+      apt: 
+        name: linux-headers-amd64
+        state: latest
+
+    # - name: "Install NVIDIA Driver"
+    #   apt: 
+    #     name: nvidia-driver
+    #     state: present
+
+    # - name: "Install Steam"
+    #   apt: 
+    #     name: steam
+    #     state: latest
