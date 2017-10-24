@@ -21,49 +21,71 @@
         - gnupg2
         - software-properties-common
 
+    - name: "Install Core Packages"
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - curl
+
     - name: "Google Chrome Apt Repository"
       apt_repository:
         repo: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
         state: present
         filename: google-chrome
+      tags:
+        - apt-repository
 
     - name: "Jenkins Apt Repository"
       apt_repository:
         repo: deb https://pkg.jenkins.io/debian-stable binary/
         state: present
         filename: jenkins
+      tags:
+        - apt-repository
 
     - name: "Debian Apt Repository - Contrib"
       apt_repository:
         repo: deb http://debian.osuosl.org/debian/ stretch contrib
         state: present
         filename: debian-contrib
+      tags:
+        - apt-repository
 
     - name: "Debian Apt Repository - Non-Free"
       apt_repository:
         repo: deb http://debian.osuosl.org/debian/ stretch non-free
         state: present
         filename: debian-non-free
+      tags:
+        - apt-repository
 
     - name: "Sublime Text Apt Repository"
       apt_repository:
         repo: deb https://download.sublimetext.com/ apt/stable/
         state: present
         filename: sublime-text
+      tags:
+        - apt-repository
 
     - name: "Docker Apt Repository"
       apt_repository:
         repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
         state: present
         filename: docker
+      tags:
+        - apt-repository
+
+    - name: "Docker Apt Repository Key"
+      command: curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | sudo apt-key add -
 
     - name: "Update Apt cache"
       apt:
         update_cache: true
 
-    - name: "Add sudoers.d/ file"
+    - name: "Add weaverg sudoers.d/ file"
       template: 
-        src: templates/sudoers.j2
+        src: templates/sudoers.weaverg.j2
         dest: /etc/sudoers.d/weaverg
 
     - name: "Install Sublime Text"
@@ -81,7 +103,7 @@
         name: docker-ce
         state: latest
 
-    - name: "Linux Headers - AMD64"
+    - name: "Install Linux Headers - AMD64"
       apt: 
         name: linux-headers-amd64
         state: latest
@@ -94,4 +116,17 @@
     # - name: "Install Steam"
     #   apt: 
     #     name: steam
-    #     state: latest
+    #     state: present
+
+    - name: "Install OpenJDK 8"
+      apt: 
+        # name: openjdk-8-jre
+        name: openjdk-8-jdk
+        state: latest
+
+# Ruby
+# Python
+
+# playbook-base
+# playbook-base-jdk
+# etc, etc.
